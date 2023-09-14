@@ -1,0 +1,109 @@
+<html>
+	<head> 
+		<script src="axios.min.js"></script>
+	</head>
+	<body>
+		<table border="2" class="table">
+			<tbody id="products"></tbody>
+		</table>
+		<form id="back"></form>
+
+		<script>
+			var product = [];
+			function load() {
+					axios.get("http://127.0.0.1:8000/products")
+						.then(buidTable)
+						}
+			async function buidTable(resp){
+					console.log(resp);
+					if (resp.status != 200) return;
+					var body = "";
+					var knopka = "";
+					var idx = 0;
+					body += "<thead> <tr> <th> Products </th> </tr> </thead>";	
+					for ( let item of resp.data) {
+						product[idx] = item;
+						
+						var r = await axios.get("http://127.0.0.1:8000/product/"+idx);
+						body += "<tr>"
+						+"<td>"+item+"</td><td>"
+						+"<button onclick='load_2("+idx+")'>Показать</button>"
+						+"</td></tr>";
+						idx++;
+								}
+					document.getElementById('products').innerHTML = body;
+					document.getElementById('back').innerHTML = knopka;
+						}
+		</script>
+
+		<script>
+			var models = []
+			var nidx;
+			function load_2(name_idx) {
+					nidx = name_idx;
+					axios.get("http://127.0.0.1:8000/products/"+product[name_idx])
+						.then(buidTable_2)
+						}
+			async function buidTable_2(resp){
+					console.log(resp);
+					if (resp.status != 200) return;
+					var body = "";
+					var idx = 0;
+					var knopka = "";
+					body += "<thead> <tr> <th> Products </th>"
+						+"<th> Models </th>"
+				   		+ "</tr></thead>";
+						for ( let item of resp.data) {
+							models[idx] = item[1];
+
+							var r = await axios.get("http://127.0.0.1:8000/products/names/"+idx);
+							body += "<tr>"
+								+"<td>"+item[0]+"</td>"
+								+"<td>"+item[1]+"</td><td>"
+								+"<button onclick='load_list(product["+nidx+"], models["+idx+"])'>Показать</button>"
+								+"</td></tr>";
+								idx++;
+									}
+					document.getElementById('products').innerHTML = body;
+					knopka += "<button type='button' onclick='load()'> Назад</button>"
+					document.getElementById('back').innerHTML = knopka;
+						}
+		</script>
+
+		<script>
+                        function load_list(name, md) {
+                                        axios.get("http://127.0.0.1:8000/products/"+name+"/"+md)
+                                                .then(buidTable_list)
+                                                }
+                        async function buidTable_list(resp){
+                                        console.log(resp);
+                                        if (resp.status != 200) return;
+                                        var body = "";
+                                        var idx = 0;
+                                        var knopka = "";
+                                        body += "<thead> <tr> <th> Products </th>"
+                                                +"<th> Models </th>"
+						+"<th> Color </th>"
+						+"<th> Price </th>"
+                                                + "</tr></thead>";
+                                                for ( let item of resp.data) {
+                                                        var r = await axios.get("http://127.0.0.1:8000/products/names/models/"+idx);
+                                                        body += "<tr>"
+                                                                +"<td>"+item[0]+"</td>"
+                                                                +"<td>"+item[1]+"</td>"
+								+"<td>"+item[2]+"</td>"
+								+"<td>"+item[3]+"</td>"
+                                                                +"</tr>";
+								idx++;
+                                                                        }
+                                        document.getElementById('products').innerHTML = body;
+                                        knopka += "<button type='button' onclick='load()'> Назад</button>"
+                                        document.getElementById('back').innerHTML = knopka;
+                                                }
+                </script>
+
+		<script>
+			load();
+		</script>
+	</body>
+</html>
